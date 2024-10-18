@@ -96,6 +96,7 @@ nano id_rsa
 # Cole o conteúdo aqui.
 ```
 
+4. **Configure a variável de ambiente do docker no arquivo /docker/.env.docker**:
 ```bash
 # Configuracoes do banco
 DB_NAME=sys
@@ -107,12 +108,12 @@ REPOSITORY_SSH=none
 REPOSITORY_SSH=git@github.com:raulntjj/docker_laravel_enviroment.git
 ```
 
-4. **Contrua os containers, para isso utilize:**:
+5. **Contrua os containers, para isso utilize:**:
 
 ```bash
 sudo make build
 ```
-Ao realizar estes passos, seu ambiente estará configurado e instalado, com phpMyAdmin na porta 8888, nginx na porta 8989, e com mysql na porta 3306. 
+Ao realizar estes passos, seu ambiente estará configurado e instalado, com phpMyAdmin na porta 8888, nginx na porta 8989, e com mysql na porta 3306, caso não tenha alterado as portas. 
 
 ## Comandos Disponíveis
 
