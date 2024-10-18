@@ -96,7 +96,7 @@ nano id_rsa
 # Cole o conteúdo aqui.
 ```
 
-4. **Contrua os containers, para isso utilize:**:
+4. **Contrua os containers, para isso utilize**:
 
 ```bash
 sudo make build
