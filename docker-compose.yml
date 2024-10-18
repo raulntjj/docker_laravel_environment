@@ -1,0 +1,100 @@
+services:
+    app:
+        container_name: 'app'
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: always
+        working_dir: /var/www/
+        volumes:
+            - ./:/var/www
+        networks:
+            - laravel-11
+        healthcheck:
+            test: ["CMD", "php", "-r", "file_exists('/var/www/repository/artisan') || exit(1);"]
+            interval: 1m
+            timeout: 10s
+            retries: 3
+
+    webserver:
+        container_name: 'nginx'
+        image: nginx:alpine
+        restart: always
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/:/etc/nginx/conf.d/
+        ports:
+            - "${NGINX_PORT}:80"
+        depends_on:
+            - app
+        networks:
+            - laravel-11
+        healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]
+            interval: 1m
+            timeout: 10s
+            retries: 3
+
+    db:
+        container_name: 'db'
+        image: mysql:8.0.34
+        restart: always
+        environment:
+            MYSQL_DATABASE: ${DB_NAME}
+            MYSQL_ROOT_PASSWORD: ${DB_PASS}
+        ports:
+            - "${DB_PORT}:3306"
+        volumes:
+            - ./.docker/dbdata:/var/lib/mysql
+        networks:
+            - laravel-11
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    phpmyadmin:
+        container_name: 'myadmin'
+        image: phpmyadmin/phpmyadmin
+        environment:
+            PMA_HOST: db
+            PMA_PORT: 3306
+            UPLOAD_LIMIT: 1024M
+            MEMORY_LIMIT: 1024M
+            MAX_EXECUTION_TIME: 300
+        ports:
+            - "${MYADMIN_PORT}:80"
+        depends_on:
+            - db
+        networks:
+            - laravel-11
+        healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]
+            interval: 1m
+            timeout: 10s
+            retries: 3
+
+    queue:
+        container_name: 'queue'
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: always
+        command: "php artisan queue:work"
+        volumes:
+            - ./:/var/www
+        depends_on:
+            - app
+        networks:
+            - laravel-11
+        healthcheck:
+            test: ["CMD", "php", "-r", "file_exists('/var/www/repository/artisan') || exit(1);"]
+            interval: 1m
+            timeout: 10s
+            retries: 3
+
+networks:
+    laravel-11:
+        name: Laravel
+        driver: bridge
