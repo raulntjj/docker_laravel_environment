@@ -91,7 +91,8 @@ git config --global --add safe.directory /var/www/repository
 log_success "Git configured."
 
 log_success "Entrypoint finished."
-git ls-files -z | xargs -0 git update-index --assume-unchanged
+git checkout .
+
 
 
 # Executa qualquer comando que tenha sido fornecido via docker-compose ou linha de comando
