@@ -96,19 +96,7 @@ nano id_rsa
 # Cole o conteúdo aqui.
 ```
 
-4. **Configure a variável de ambiente do docker no arquivo /docker/.env.docker**:
-```bash
-# Configuracoes do banco
-DB_NAME=sys
-DB_PASS=root
-
-# Para criar um projeto laravel utilize o valor "none"
-REPOSITORY_SSH=none
-# Caso possua um repositório, altere o valor para a URL SSH do seu repositório remoto.
-REPOSITORY_SSH=git@github.com:raulntjj/docker_laravel_enviroment.git
-```
-
-5. **Contrua os containers, para isso utilize:**:
+4. **Contrua os containers, para isso utilize:**:
 
 ```bash
 sudo make build
