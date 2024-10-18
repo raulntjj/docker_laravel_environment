@@ -30,20 +30,20 @@ else
     exit 1
 fi
 
-# Setando permissao para GIT no diretorio
-log_info "Running command for git configs..."
-git config --global --add safe.directory /var/www
-git config --global --add safe.directory /var/www/repository
-log_success "Git configured."
-
-log_info "Cloning repository..."
-git clone $REPOSITORY_SSH /var/www/repository
+if [ "$REPOSITORY_SSH" = 'none' ]; then
+    cd /var/www
+    log_info "Creating laravel project..."
+    composer create-project laravel/laravel repository
+else
+    log_info "Cloning repository..."
+    git clone $REPOSITORY_SSH /var/www/repository
+fi
 log_success "Repository cloned."
+cd /var/www/repository
 
 # Instalando depedências
 log_info "Running composer install/update..."
-cd /var/www/repository
-composer update || composer install
+composer update
 log_success "Dependencies installed"
 
 # Gera a chave da aplicação Laravel
@@ -61,19 +61,34 @@ log_success "MYSQL started."
 
 # rodando migrations
 log_info "Running migrations..."
-# Alterando a .env para as configuracoes do banco do container
+# Alterando a .env para as configuracoes do banco de dados do container
+sed -i "/^# DB_CONNECTION=/c\DB_CONNECTION=mysql" .env
+sed -i "/^# DB_HOST=/c\DB_HOST=db" .env
+sed -i "/^# DB_PORT=/c\DB_PORT=3306" .env
+sed -i "/^# DB_DATABASE=/c\DB_DATABASE=${DB_NAME}" .env
+sed -i "/^# DB_USERNAME=/c\DB_USERNAME=root" .env
+sed -i "/^# DB_PASSWORD=/c\DB_PASSWORD=${DB_PASS}" .env
+
+
 sed -i "/^DB_CONNECTION=/c\DB_CONNECTION=mysql" .env
 sed -i "/^DB_HOST=/c\DB_HOST=db" .env
 sed -i "/^DB_PORT=/c\DB_PORT=3306" .env
 sed -i "/^DB_DATABASE=/c\DB_DATABASE=${DB_NAME}" .env
 sed -i "/^DB_USERNAME=/c\DB_USERNAME=root" .env
 sed -i "/^DB_PASSWORD=/c\DB_PASSWORD=${DB_PASS}" .env
+
 php artisan migrate --force
 
 # Seta permissões para alterações no projeto
 log_info "Setting permissions..."
 chmod -R 777 .
 log_success "Permissions granted."
+
+# Setando permissao para GIT no diretorio
+log_info "Running command for git configs..."
+git config --global --add safe.directory /var/www
+git config --global --add safe.directory /var/www/repository
+log_success "Git configured."
 
 log_success "Entrypoint finished."
 git ls-files -z | xargs -0 git update-index --assume-unchanged
